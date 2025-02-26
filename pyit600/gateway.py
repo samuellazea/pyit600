@@ -929,7 +929,12 @@ class IT600Gateway:
                     response_json_string = self._encryptor.decrypt(response_bytes)
 
                     if self._debug:
-                        _LOGGER.debug("Gateway response:\n%s\n", response_json_string)
+                        try:
+                            response_json = json.loads(response_json_string)  # Parse the string into JSON
+                            _LOGGER.debug("Gateway response:\n%s\n", json.dumps(response_json, indent=4))  # Pretty print JSON
+                        except json.JSONDecodeError as e:
+                            _LOGGER.error("Failed to decode JSON response: %s\n", e)
+                            _LOGGER.debug("Raw Gateway response:\n%s\n", response_json_string)
 
                     response_json = json.loads(response_json_string)
 
