@@ -165,7 +165,7 @@ class IT600Gateway:
                 filter(lambda x: "sIASZS" in x or
                                  ("sBasicS" in x and
                                   "ModelIdentifier" in x["sBasicS"] and
-                                  x["sBasicS"]["ModelIdentifier"] in ["it600MINITRV", "it600Receiver"]), all_devices["id"])
+                                  x["sBasicS"]["ModelIdentifier"] in ["it600MINITRV", "it600Receiver", "SmokeSensor-EM"]), all_devices["id"])
             )
 
             await self._refresh_binary_sensor_devices(binary_sensors, send_callback)
@@ -402,6 +402,7 @@ class IT600Gateway:
 
     async def _refresh_binary_sensor_devices(self, devices: List[Any], send_callback=False):
         local_devices = {}
+        _LOGGER.debug(f"!!!!!!! _refresh_binary_sensor_devices: {devices}")
 
         if devices:
             status = await self._make_encrypted_request(
@@ -422,6 +423,10 @@ class IT600Gateway:
                     model: Optional[str] = device_status.get("DeviceL", {}).get("ModelIdentifier_i", None)
                     if model in ["it600MINITRV", "it600Receiver"]:
                         is_on: Optional[bool] = device_status.get("sIT600I", {}).get("RelayStatus", None)
+                    elif model == "SmokeSensor-EM":
+                        # You'll need to set a default state or find the correct attribute
+                        # This assumes the sensor is off by default
+                        is_on = 0  # or use some other attribute that indicates the alarm state
                     else:
                         is_on: Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
 
@@ -449,6 +454,8 @@ class IT600Gateway:
                     )
 
                     local_devices[device.unique_id] = device
+                    _LOGGER.debug(f"Detected device: {model}, Device Class: {device}, Unique ID: {device_status['data']['UniID']}")
+
 
                     if send_callback:
                         self._binary_sensor_devices[device.unique_id] = device
@@ -959,6 +966,7 @@ class IT600Gateway:
                 ) from e
             except Exception as e:
                 _LOGGER.error("Exception: %s", repr(e))
+#                _LOGGER.error("Exception. %s / %s", type(e), repr(e.args), e)
                 raise IT600CommandError(
                     "Unknown error occurred while communicating with iT600 gateway"
                 ) from e
