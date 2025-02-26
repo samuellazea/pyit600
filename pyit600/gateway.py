@@ -119,7 +119,7 @@ class IT600Gateway:
             return gateway["sGateway"]["NetworkLANMAC"]
         except IT600ConnectionError as ae:
             try:
-                with async_timeout.timeout(self._request_timeout):
+                async with async_timeout.timeout(self._request_timeout):
                     await self._session.get(f"http://{self._host}:{self._port}/")
             except Exception:
                 raise IT600ConnectionError(
@@ -919,7 +919,7 @@ class IT600Gateway:
                 if self._debug:
                     _LOGGER.debug("Gateway request: POST %s\n%s\n", request_url, request_body_json)
 
-                with async_timeout.timeout(self._request_timeout):
+                async with async_timeout.timeout(self._request_timeout):
                     resp = await self._session.post(
                         request_url,
                         data=self._encryptor.encrypt(request_body_json),
@@ -953,7 +953,7 @@ class IT600Gateway:
                     "check if you have specified host/IP address correctly"
                 ) from e
             except Exception as e:
-                _LOGGER.error("Exception. %s / %s", type(e), repr(e.args), e)
+                _LOGGER.error("Exception: %s", repr(e))
                 raise IT600CommandError(
                     "Unknown error occurred while communicating with iT600 gateway"
                 ) from e
