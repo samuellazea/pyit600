@@ -424,9 +424,11 @@ class IT600Gateway:
                     if model in ["it600MINITRV", "it600Receiver"]:
                         is_on: Optional[bool] = device_status.get("sIT600I", {}).get("RelayStatus", None)
                     elif model == "SmokeSensor-EM":
-                        # You'll need to set a default state or find the correct attribute
-                        # This assumes the sensor is off by default
-                        is_on = 0  # or use some other attribute that indicates the alarm state
+                        # First try to get the standard alarm attribute
+                        is_on = Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
+                        # If it doesn't exist, default to 0 (not alarmed)
+                        if is_on is None:
+                            is_on = 0
                     else:
                         is_on: Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
 
