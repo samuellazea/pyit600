@@ -402,7 +402,7 @@ class IT600Gateway:
 
     async def _refresh_binary_sensor_devices(self, devices: List[Any], send_callback=False):
         local_devices = {}
-        _LOGGER.debug(f"!!!!!!! _refresh_binary_sensor_devices: {devices}")
+        _LOGGER.debug(f"Logging  _refresh_binary_sensor_devices: {devices}")
 
         if devices:
             status = await self._make_encrypted_request(
@@ -425,10 +425,11 @@ class IT600Gateway:
                         is_on: Optional[bool] = device_status.get("sIT600I", {}).get("RelayStatus", None)
                     elif model == "SmokeSensor-EM":
                         # First try to get the standard alarm attribute
-                        is_on = Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
+                        is_on: Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
                         # If it doesn't exist, default to 0 (not alarmed)
                         if is_on is None:
                             is_on = 0
+                        _LOGGER.debug(f"Smoke sensor is_on: {is_on}")
                     else:
                         is_on: Optional[bool] = device_status.get("sIASZS", {}).get("ErrorIASZSAlarmed1", None)
 
